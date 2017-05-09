@@ -123,11 +123,8 @@ def rotate_vec(vec, ang):
 
 
 def rotate_pt(pt1, pt_mid, ang):
-    vec = [pt1.X - pt_mid.X, pt_mid.Y - pt1.Y]
-    if pt1.X > pt_mid:
-        x = pt_mid.X + dist_pt(pt1, pt_mid)
-        y = pt_mid.Y
-    else:
-        x = pt_mid.X - dist_pt(pt1, pt_mid)
-        y = pt_mid.Y
+    vec = [pt1.X - pt_mid.X, pt1.Y - pt_mid.Y]
+    vec2 = rotate_vec(vec, ang)
+    x = pt_mid.X + vec2[0]
+    y = pt_mid.Y + vec2[1]
     return arcpy.Point(x, y)
