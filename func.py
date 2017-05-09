@@ -83,7 +83,7 @@ def move_pt(pt, vec):
     pt_res = arcpy.Point(pt.X+vec[0], pt.Y+vec[1])
     return pt_res
 
-def get_angle(pt1, pt2):
+def get_angle(pt1, pt2):  # 这里的angle其实是tan
     if abs(pt2.X-pt1.X) < 0.000001:
         return 999999.0
     else:
@@ -115,6 +115,11 @@ def dist_pt(pt1, pt2):
     return dist
 
 def rotate_vec(vec, ang):
+    vec1 = mat([vec])
+    angmat = mat([[cos(ang),-sin(ang)],
+                  [sin(ang),cos(ang)]])
+    vec2 = vec1*angmat
+    return [vec2.tolist()[0][0], vec2.tolist()[0][1]]
 
 
 def rotate_pt(pt1, pt_mid, ang):
