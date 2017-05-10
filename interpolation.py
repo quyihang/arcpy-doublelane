@@ -2,6 +2,16 @@ from numpy import *
 import arcpy
 import func
 
+
+
+###
+
+# 改进了之前的插值曲线算法。
+#
+# 通过旋转，先转到坐标水平的位置，再插值，插值完再转回来。
+#
+# 另外，调头的曲线，单独判断完再插值.
+###
 def pre_rotate(pt1, l1, pt2, l2):
     if pt1.X == pt2.X:
         pt1.X -= 0.0001
