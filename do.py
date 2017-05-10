@@ -225,14 +225,9 @@ class doubleLineConvert():
                     if (oNode['parent_nod'] == osNode['parent_nod']) and (osNode['from_to'] == 0): # 这里表示从一个标记为1的终点，连线上标记为0的起点 # oNode起osNode终
                         draw_line += 1
                         print 'line_count: '+str(draw_line)
-                        [pt_list, count_flag] = interpolation.polation(oNode['SHAPE'], oNode['angle'], osNode['SHAPE'], osNode['angle'])
-                        # [pt_list, count_flag] = [[oNode["SHAPE"], osNode["SHAPE"]], 2]
-                        new_pt_list = []
-                        for pt in pt_list:
-                            new_pt = arcpy.Point(pt.X, pt.Y)
-                            new_pt_list.append(new_pt)
-                        print 'list_pt_count: '+str(len(new_pt_list))
-                        line = arcpy.Polyline(arcpy.Array(new_pt_list))
+                        [pt_list, count_flag] = interpolation.pre_rotate(oNode['SHAPE'], oNode['angle'], osNode['SHAPE'], osNode['angle'])
+                        print 'list_pt_count: '+str(len(pt_list))
+                        line = arcpy.Polyline(arcpy.Array(pt_list))
                         print line
                         print line.length
                         line = func.judgeDirect(oNode['SHAPE'], line)

@@ -4,20 +4,28 @@ import func
 
 def pre_rotate(pt1, l1, pt2, l2):
     if pt1.X == pt2.X:
-        pt1.X-=0.0001
+        pt1.X -= 0.0001
     ang = func.get_angle(pt1, pt2)
     ang = arctan(ang)
     pt_mid = arcpy.Point((pt1.X+pt2.X)/2,(pt1.Y+pt2.Y)/2)
-    pt1 = func.rotate_pt(pt1, pt_mid, -ang)
-    pt2 = func.rotate_pt(pt2, pt_mid, -ang)
-    l1 = tan(arctan(l1)-ang)
-    l2 = tan(arctan(l2)-ang)
-    [pt_list, count_flag] = polation(pt1, l1, pt2, l2)
+    pt11 = func.rotate_pt(pt1, pt_mid, -ang)
+    pt21 = func.rotate_pt(pt2, pt_mid, -ang)
+    if func.likelyequal(l1, l2):
+        if pt11.X < pt21.X:
+            l11 = 1
+            l21 = -1
+        else:
+            l11 = -1
+            l21 = 1
+    else:
+        l11 = tan(arctan(l1)-ang)
+        l21 = tan(arctan(l2)-ang)
+    [pt_list, count_flag] = polation(pt11, l11, pt21, l21)
     pt_list2 = []
     for pt in pt_list:
         pt = func.rotate_pt(pt, pt_mid, ang)
         pt_list2.append(pt)
-    return pt_list2
+    return [pt_list2, count_flag]
 
 
 def polation(pt2, l1, pt3, l2):
@@ -44,8 +52,6 @@ def polation(pt2, l1, pt3, l2):
     count_flag = 0
     while x < x2:
         y = a*x**3 + b*x**2 + c*x + d
-        # print str([x-x0,y-y0-0.05575])
-        # print str([x,y+y0-y00])
         pt_list.append(arcpy.Point(x, y))
         x += step
         count_flag += 1

@@ -40,6 +40,13 @@ def compare_pt(pt1, pt2):
         flag = False
     return flag
 
+def likelyequal(a,b):
+    if abs(a-b)<0.000001:
+        return True
+    else:
+        return False
+
+
 def shift_vector(pt_array, width_forward, width_backward, direct_flag): # 方向是起点到终点的方向之垂直，正向为左，逆向为右。方向flag为True，则起点就是pt_array的起点，False则起点是pt_array的终点
     start_pt = pt_array[0]
     end_pt = pt_array[-1]
