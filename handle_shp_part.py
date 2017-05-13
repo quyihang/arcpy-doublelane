@@ -30,9 +30,11 @@ def get_list_max(list):
     return -1
 
 def the_other(num1, num2, num_list):
-    if num1 in num_list:
-        return num2
-    return num1
+    if int(num1) in num_list:
+        num_list.append(int(num2))
+        return int(num2)
+    num_list.append(int(num1))
+    return int(num1)
 
 
 def main1():

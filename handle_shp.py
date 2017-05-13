@@ -23,6 +23,7 @@ def readline(strpath):
         total_list.append(record)
     return total_list
 
+
 def get_list_max(list):
     for item in list:
         if list.count(item) > 1:
@@ -30,7 +31,15 @@ def get_list_max(list):
     return -1
 
 
-if __name__ == '__main__':
+def the_other(num1, num2, num_list):
+    if int(num1) in num_list:
+        num_list.append(int(num2))
+        return int(num2)
+    num_list.append(int(num1))
+    return int(num1)
+
+
+def main1():
     lineLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink.shp'
     nodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink_ND_Junctions.shp'
     total_list = readline(lineLayer)
@@ -56,3 +65,28 @@ if __name__ == '__main__':
         print row[1]
         rows.updateRow(row)
         print "update!"
+
+
+def main2():
+    lineLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink.shp'
+    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink_ND_Junctions.shp'
+    total_list = readline(lineLayer)
+    print "reading lines ..."
+    rows = arcpy.da.SearchCursor(nodeLayer, ("join_id",))
+    pt_no_list = []
+    for row in rows:
+        pt_no_list.append(row[0])
+    rows = arcpy.da.UpdateCursor(nodeLayer, ("SHAPE@", "join_id"))
+    for row in rows:
+        if row[1] <> -1:
+            continue
+        pt1 = row[0]
+        for line in total_list:
+            if func.compare_pt(pt1.labelPoint, line[0]) or func.compare_pt(pt1.labelPoint, line[1]):
+                row[1] = the_other(line[2], line[3], pt_no_list)
+                rows.updateRow(row)
+                print str(row[1])+"  update"
+                break
+
+
+main2()
