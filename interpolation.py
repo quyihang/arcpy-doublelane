@@ -1,3 +1,4 @@
+#coding:utf-8
 from numpy import *
 import arcpy
 import func
@@ -18,22 +19,18 @@ def pre_rotate(pt1, l1, pt2, l2):
     ang = func.get_angle(pt1, pt2)
     ang = arctan(ang)
     pt_mid = arcpy.Point((pt1.X+pt2.X)/2,(pt1.Y+pt2.Y)/2)
-    pt11 = func.rotate_pt(pt1, pt_mid, -ang)
-    pt21 = func.rotate_pt(pt2, pt_mid, -ang)
+    pt11 = func.rotate_pt(pt1, pt_mid, ang)
+    pt21 = func.rotate_pt(pt2, pt_mid, ang)
     if func.likelyequal(l1, l2):
-        if pt11.X < pt21.X:
-            l11 = 1
-            l21 = -1
-        else:
-            l11 = -1
-            l21 = 1
+        l11 = 0
+        l21 = 0
     else:
         l11 = tan(arctan(l1)-ang)
         l21 = tan(arctan(l2)-ang)
     [pt_list, count_flag] = polation(pt11, l11, pt21, l21)
     pt_list2 = []
     for pt in pt_list:
-        pt = func.rotate_pt(pt, pt_mid, ang)
+        pt = func.rotate_pt(pt, pt_mid, -ang)
         pt_list2.append(pt)
     return [pt_list2, count_flag]
 

@@ -239,14 +239,10 @@ if __name__ == '__main__':
     # nodeLayer = arcpy.GetParameterAsText(1)
     # outputLineLayer = arcpy.GetParameterAsText(2)
     # outputNodeLayer = arcpy.GetParameterAsText(3)
-    # lineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/road_test.shp'
-    # nodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/nodes_test.shp'
-    # outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_road.shp'
-    # outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_node.shp'
-    lineLayer = 'C:/Users/qu/Desktop/bishe/data/part/part.shp'
-    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/part_junctions.shp'
-    outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_road.shp'
-    outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_node.shp'
+    lineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/road_test.shp'
+    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/nodes_test.shp'
+    outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_road.shp'
+    outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_node.shp'
     # arcpy.AddMessage(lineLayer)
     # arcpy.AddMessage(nodeLayer)
     # arcpy.AddMessage(outputLineLayer)
