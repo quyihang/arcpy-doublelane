@@ -177,11 +177,16 @@ class doubleLineConvert():
             line = func.judgeDirect(node_start_l, line)
             line_cursor.insertRow((node_id_f, node_id_t, lane_forward, line))
 
+ffff = 0
 
     def no_shift_lane(self, pt_array, start_node_id, end_node_id, lane, intend_head, intend_tail):  # 这里逻辑稍微改变一下。先调准顺序
+        global ffff
+        ffff += 1
+        print "shift! " +str(ffff)
         line_cursor = arcpy.da.InsertCursor(self.outputLineLayer, ("from_id", "to_id", "lane_count", "SHAPE@"))
         node_cursor = arcpy.da.InsertCursor(self.outputNodeLayer, ("parent_nod", "from_to", "node_id", "SHAPE@", "angle")) # from/start: 0   to/end: 1
         direct_flag = True # 用来判断起点id和node_array存储起点是否一致。一致为True，不一致为False
+        start_node = arcpy.Point(0.0, 0.0)
         for row in self.nodeList:
             if start_node_id == row[0]:
                 start_node = arcpy.Point(row[1], row[2])
@@ -243,10 +248,14 @@ if __name__ == '__main__':
     # nodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/nodes_test.shp'
     # outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_road.shp'
     # outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_node.shp'
-    lineLayer = 'C:/Users/qu/Desktop/bishe/data/part/part.shp'
-    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/part_junctions.shp'
-    outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_road.shp'
-    outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_node.shp'
+    # lineLayer = 'C:/Users/qu/Desktop/bishe/data/part/part.shp'
+    # nodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/part_junctions.shp'
+    # outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_road.shp'
+    # outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_node.shp'
+    lineLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink.shp'
+    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink_ND_Junctions.shp'
+    outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/now/output_road.shp'
+    outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/output_node.shp'
     # arcpy.AddMessage(lineLayer)
     # arcpy.AddMessage(nodeLayer)
     # arcpy.AddMessage(outputLineLayer)
