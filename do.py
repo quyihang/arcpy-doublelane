@@ -5,6 +5,7 @@ import interpolation
 import json
 
 LANE_WIDTH = 5
+ffff = 0
 
 class doubleLineConvert():
     def __init__(self, lineLayer, nodeLayer, outputLineLayer, outputNodeLayer):
@@ -31,14 +32,16 @@ class doubleLineConvert():
             self.outputNodeList.append({'id':id, 'num':0})
 
     def dealLine(self):
+        shift_count = 0
         for row in arcpy.da.SearchCursor(self.lineLayer,("FID","Forward_L","Backward_L","Start_Node","End_Node","SHAPE@")):
             self.lineList.append(row)
         for row in self.lineList:
+            print "shift " + str(shift_count)
+            shift_count+=1
             id = row[0]; forward_lane = row[1]; backward_lane = row[2]; start_node = row[3]; end_node = row[4]; pts = row[-1]
             # self.lineList.append(row)
             pt_array = []
             for part in pts:
-                # 这里我就把part分开成不同记录的数了。然后之后根据line的index和node关联起来
                 for pt in part:
                     pt_array.append(pt)
             [intend_head, intend_tail] = self.get_intend(row)
@@ -118,7 +121,7 @@ class doubleLineConvert():
 
     # 代码不支持多段part，请提前分离好！
     def shift_lane_double(self, pt_array, start_node_id, end_node_id, lane_forward, lane_backward, intend_head, intend_tail):
-        line_cursor = arcpy.da.InsertCursor(self.outputLineLayer, ("from_id", "to_id", "lane_count", "SHAPE@"))
+        line_cursor = arcpy.da.InsertCursor(self.outputLineLayer, ("from_id", "to_id", "lane_count", "SHAPE@","road_flag"))
         node_cursor = arcpy.da.InsertCursor(self.outputNodeLayer, ("parent_nod", "from_to", "node_id", "SHAPE@", "angle")) # from/start: 0   to/end: 1
         direct_flag = True # 用来判断起点id和node_array存储起点是否一致。一致为True，不一致为False
         for row in self.nodeList:
@@ -147,7 +150,7 @@ class doubleLineConvert():
             self.trueOutputNodeList.append({"node_id": node_id_t, "parent_nod": end_node_id, "from_to": 1, "SHAPE": node_end_r, "angle": angle_end_r})
             line = arcpy.Polyline(arcpy.Array(pt_array_r))
             line = func.judgeDirect(node_start_r, line)
-            line_cursor.insertRow((node_id_f, node_id_t, lane_forward, line))
+            line_cursor.insertRow((node_id_f, node_id_t, lane_forward, line, 0))
             node_id_f = self.get_output_node_id(end_node_id)
             node_cursor.insertRow((end_node_id, 0, node_id_f, node_start_l, angle_start_l))
             self.trueOutputNodeList.append({"node_id": node_id_f, "parent_nod": end_node_id, "from_to": 0, "SHAPE": node_start_l, "angle": angle_start_l})
@@ -156,7 +159,7 @@ class doubleLineConvert():
             self.trueOutputNodeList.append({"node_id": node_id_t, "parent_nod": start_node_id, "from_to": 1, "SHAPE": node_end_l, "angle": angle_end_l})
             line = arcpy.Polyline(arcpy.Array(pt_array_l))
             line = func.judgeDirect(node_start_l, line)
-            line_cursor.insertRow((node_id_f, node_id_t, lane_backward, line))
+            line_cursor.insertRow((node_id_f, node_id_t, lane_backward, line, 0))
         elif direct_flag == False:
             node_id_f = self.get_output_node_id(end_node_id)
             node_cursor.insertRow((end_node_id, 0, node_id_f, node_start_r, angle_start_r))
@@ -166,7 +169,7 @@ class doubleLineConvert():
             self.trueOutputNodeList.append({"node_id": node_id_t, "parent_nod": start_node_id, "from_to": 1, "SHAPE": node_end_r, "angle": angle_end_r})
             line = arcpy.Polyline(arcpy.Array(pt_array_r))
             line = func.judgeDirect(node_start_r, line)
-            line_cursor.insertRow((node_id_f, node_id_t, lane_backward, line))
+            line_cursor.insertRow((node_id_f, node_id_t, lane_backward, line, 0))
             node_id_f = self.get_output_node_id(start_node_id)
             node_cursor.insertRow((start_node_id, 0, node_id_f, node_start_l, angle_start_l))
             self.trueOutputNodeList.append({"node_id": node_id_f, "parent_nod": start_node_id, "from_to": 0, "SHAPE": node_start_l, "angle": angle_start_l})
@@ -175,9 +178,8 @@ class doubleLineConvert():
             self.trueOutputNodeList.append({"node_id": node_id_t, "parent_nod": end_node_id, "from_to": 1, "SHAPE": node_end_l, "angle": angle_end_l})
             line = arcpy.Polyline(arcpy.Array(pt_array_l))
             line = func.judgeDirect(node_start_l, line)
-            line_cursor.insertRow((node_id_f, node_id_t, lane_forward, line))
+            line_cursor.insertRow((node_id_f, node_id_t, lane_forward, line, 0))
 
-ffff = 0
 
     def no_shift_lane(self, pt_array, start_node_id, end_node_id, lane, intend_head, intend_tail):  # 这里逻辑稍微改变一下。先调准顺序
         global ffff
@@ -194,8 +196,8 @@ ffff = 0
                 end_node = arcpy.Point(row[1], row[2])
         if not (func.compare_pt(start_node, pt_array[0])):
             pt_array = list(reversed(pt_array))
-        pt_array = func.cut_head(pt_array, intend_head)
         pt_array = func.cut_tail(pt_array, intend_tail)
+        pt_array = func.cut_head(pt_array, intend_head)
         node_id_f = self.get_output_node_id(start_node_id)
         node_id_t = self.get_output_node_id(end_node_id)
         line = arcpy.Polyline(arcpy.Array(pt_array))
@@ -221,46 +223,63 @@ ffff = 0
                 break
         return output_node_id
 
+
+
+class curve():
+    def __init__(self, outputNodeLayer, outputLineLayer):
+        self.outputNodeLayer = outputNodeLayer
+        self.outputLineLayer = outputLineLayer
+
+    def get_parent_group(self):
+        self.trueOutputNodeList = []
+        app_count = 0
+        for row in arcpy.da.SearchCursor(self.outputNodeLayer, ("node_id","parent_nod","from_to","SHAPE@","angle")):
+            self.trueOutputNodeList.append({"node_id": row[0], "parent_nod": row[1], "from_to": row[2], "SHAPE": row[3], "angle": row[4]})
+            print "append: " + str(app_count)
+            app_count += 1
+
+
     def curve_inter(self):
         draw_line = 0
-        curve_cursor = arcpy.da.InsertCursor(self.outputLineLayer, ("from_id", "to_id", "lane_count", "SHAPE@", "node_count"))
+        curve_cursor = arcpy.da.InsertCursor(self.outputLineLayer, ("from_id", "to_id", "lane_count", "SHAPE@", "node_count","road_flag"))
         for oNode in self.trueOutputNodeList:
             if oNode['from_to'] == 1:
                 for osNode in self.trueOutputNodeList:
-                    if (oNode['parent_nod'] == osNode['parent_nod']) and (osNode['from_to'] == 0): # 这里表示从一个标记为1的终点，连线上标记为0的起点 # oNode起osNode终
-                        draw_line += 1
-                        print 'line_count: '+str(draw_line)
-                        [pt_list, count_flag] = interpolation.pre_rotate(oNode['SHAPE'], oNode['angle'], osNode['SHAPE'], osNode['angle'])
-                        print 'list_pt_count: '+str(len(pt_list))
-                        line = arcpy.Polyline(arcpy.Array(pt_list))
-                        print line
-                        print line.length
-                        line = func.judgeDirect(oNode['SHAPE'], line)
-                        curve_cursor.insertRow((oNode['node_id'], osNode['node_id'], 2, line, count_flag))
+                    try:
+                        if (oNode['parent_nod'] == osNode['parent_nod']) and (osNode['from_to'] == 0): # 这里表示从一个标记为1的终点，连线上标记为0的起点 # oNode起osNode终
+                            print "drawlines " + str(draw_line)
+                            draw_line += 1
+                            [pt_list, count_flag] = interpolation.pre_rotate(oNode['SHAPE'].labelPoint, oNode['angle'], osNode['SHAPE'].labelPoint, osNode['angle'])
+                            line = arcpy.Polyline(arcpy.Array(pt_list))
+                            line = func.judgeDirect(oNode['SHAPE'].labelPoint, line)
+                            curve_cursor.insertRow((oNode['node_id'], osNode['node_id'], 2, line, count_flag, 11))
+                    except:
+                        print "!"
+                        continue
 
 
-if __name__ == '__main__':
+def main1():
     # lineLayer = arcpy.GetParameterAsText(0)
     # nodeLayer = arcpy.GetParameterAsText(1)
     # outputLineLayer = arcpy.GetParameterAsText(2)
     # outputNodeLayer = arcpy.GetParameterAsText(3)
-    # lineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/road_test.shp'
-    # nodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/nodes_test.shp'
-    # outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_road.shp'
-    # outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/test/convert_beijing/output_node.shp'
-    # lineLayer = 'C:/Users/qu/Desktop/bishe/data/part/part.shp'
-    # nodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/part_junctions.shp'
-    # outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_road.shp'
-    # outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/part/output_node.shp'
-    lineLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink.shp'
-    nodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/RoadLink_ND_Junctions.shp'
-    outputLineLayer = 'C:/Users/qu/Desktop/bishe/data/now/output_road.shp'
-    outputNodeLayer = 'C:/Users/qu/Desktop/bishe/data/now/output_node.shp'
-    # arcpy.AddMessage(lineLayer)
-    # arcpy.AddMessage(nodeLayer)
-    # arcpy.AddMessage(outputLineLayer)
-    # arcpy.AddMessage(outputNodeLayer)
+    lineLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/RoadLink.shp'
+    nodeLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/RoadLink_ND_Junctions.shp'
+    outputLineLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/output_road.shp'
+    outputNodeLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/output_node.shp'
     iDoubleLine = doubleLineConvert(lineLayer,nodeLayer,outputLineLayer,outputNodeLayer)
     iDoubleLine.readData()
     iDoubleLine.dealLine()
-    iDoubleLine.curve_inter()
+    # iDoubleLine.curve_inter()
+
+def main2():
+    outputLineLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/output_road.shp'
+    outputNodeLayer = 'C:/Users/Administrator/Desktop/bishe/data/now/output_node.shp'
+    curve1 = curve(outputNodeLayer, outputLineLayer)
+    curve1.get_parent_group()
+    curve1.curve_inter()
+
+
+
+if __name__ == '__main__':
+    main2()

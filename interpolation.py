@@ -62,7 +62,6 @@ def polation(pt2, l1, pt3, l2):
         pt_list.append(arcpy.Point(x, y))
         x += step
         count_flag += 1
-        print [count_flag, x, x2]
     # test
     x = x2
     y = a * x ** 3 + b * x ** 2 + c * x + d

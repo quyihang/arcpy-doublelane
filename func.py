@@ -4,6 +4,8 @@ from numpy import *
 
 def vector(pt1, pt2): # 从pt1到pt2的单位向量
     length = ((pt1.X-pt2.X)**2+(pt1.Y-pt2.Y)**2)**0.5
+    if length == 0:
+        return [0.0, 0.0]
     return [(pt2.X - pt1.X)/length, (pt2.Y - pt1.Y)/length]
 
 
